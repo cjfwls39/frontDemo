@@ -89,15 +89,18 @@ export default function DocGraph() {
   const [selected, setSelected] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('전체');
-  const [ForceGraph, setForceGraph] = useState<React.ComponentType<unknown> | null>(null);
+  // React useState에 컴포넌트 함수를 직접 넣으면 updater로 오해 → 객체로 래핑
+  const [fgModule, setFgModule] = useState<{ Component: React.ComponentType<unknown> } | null>(null);
   const [dims, setDims] = useState({ w: 800, h: 500 });
 
-  // SSR 방지 — React.lazy 패턴 대신 dynamic import in useEffect
+  // SSR 방지 — dynamic import in useEffect
   useEffect(() => {
     import('react-force-graph-2d').then(mod => {
-      setForceGraph(() => mod.default);
+      setFgModule({ Component: mod.default as React.ComponentType<unknown> });
     });
   }, []);
+
+  const ForceGraph = fgModule?.Component ?? null;
 
   // 컨테이너 크기 감지
   useEffect(() => {
